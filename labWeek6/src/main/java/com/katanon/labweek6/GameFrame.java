@@ -4,6 +4,14 @@
  */
 package com.katanon.labweek6;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author nonku
@@ -15,6 +23,7 @@ public class GameFrame extends javax.swing.JFrame {
     private Board board;
     private int col;
     private int row;
+
     /**
      * Creates new form GameFrame
      */
@@ -24,9 +33,33 @@ public class GameFrame extends javax.swing.JFrame {
         x = new Player('X');
         load();
     }
-    
-    public void showBoard(){
-        char[][] board  = this.board.getBoard();
+
+    private void writePlayer() {
+        FileOutputStream fos = null;
+        try {
+            File file = new File("player.dat");
+            fos = new FileOutputStream(file);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(x);
+            oos.writeObject(o);
+            oos.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(GameFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(GameFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(GameFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    public void showBoard() {
+        char[][] board = this.board.getBoard();
         btn1.setText("" + board[0][0]);
         btn2.setText("" + board[0][1]);
         btn3.setText("" + board[0][2]);
@@ -37,12 +70,12 @@ public class GameFrame extends javax.swing.JFrame {
         btn8.setText("" + board[2][1]);
         btn9.setText("" + board[2][2]);
     }
-    
-    
-    public void showTurn(){
+
+    public void showTurn() {
         Player currentPlayer = board.getCurrentPlayer();
         lblStatus.setText("Turn " + currentPlayer.getSymbol());
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -453,31 +486,32 @@ public class GameFrame extends javax.swing.JFrame {
     private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseActionPerformed
         dispose();
     }//GEN-LAST:event_btnCloseActionPerformed
-    
-    public void process(){
+
+    public void process() {
         board.setRowCol(row, col);
         showBoard();
-        if(board.results()){
+        if (board.results()) {
             doFinish();
             return;
         }
         board.switchTurn();
         showTurn();
     }
-    
-    public void doFinish(){
+
+    public void doFinish() {
         board.updateStat();
         showPlayerinfo();
-        if(board.isBoardFull()){
+        if (board.isBoardFull()) {
             lblStatus.setText("Draw !!!");
         } else {
             lblStatus.setText("" + board.getCurrentPlayer().getSymbol() + " Win!!!");
         }
+        writePlayer();
         setEnableBoard(false);
         btnNewGame.setEnabled(true);
-    } 
-    
-    public void setEnableBoard(boolean isEnable){
+    }
+
+    public void setEnableBoard(boolean isEnable) {
         btn1.setEnabled(isEnable);
         btn2.setEnabled(isEnable);
         btn3.setEnabled(isEnable);
@@ -488,7 +522,7 @@ public class GameFrame extends javax.swing.JFrame {
         btn8.setEnabled(isEnable);
         btn9.setEnabled(isEnable);
     }
-    
+
     /**
      * @param args the command line arguments
      */
@@ -524,7 +558,7 @@ public class GameFrame extends javax.swing.JFrame {
             }
         });
     }
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btn1;
     private javax.swing.JButton btn2;
@@ -560,8 +594,8 @@ public class GameFrame extends javax.swing.JFrame {
         showTurn();
         btnNewGame.setEnabled(false);
     }
-    
-    private void showPlayerinfo(){
+
+    private void showPlayerinfo() {
         lblXWin.setText("Win: " + x.getWinCount());
         lblXDraw.setText("Draw: " + x.getDrawCount());
         lblXLose.setText("Lose: " + x.getLoseCount());
