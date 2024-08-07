@@ -5,9 +5,11 @@
 package com.katanon.labweek6;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,8 +20,8 @@ import java.util.logging.Logger;
  */
 public class GameFrame extends javax.swing.JFrame {
 
-    private final Player o;
-    private final Player x;
+    private Player o;
+    private Player x;
     private Board board;
     private int col;
     private int row;
@@ -51,6 +53,32 @@ public class GameFrame extends javax.swing.JFrame {
             try {
                 if (fos != null) {
                     fos.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(GameFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    private void readPlayer() {
+        FileInputStream fis = null;
+        try {
+            File file = new File("player.dat");
+            fis = new FileInputStream(file);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            x = (Player) ois.readObject();
+            o = (Player) ois.readObject(); 
+            ois.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(GameFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(GameFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(GameFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (fis != null) {
+                    fis.close();
                 }
             } catch (IOException ex) {
                 Logger.getLogger(GameFrame.class.getName()).log(Level.SEVERE, null, ex);
@@ -588,6 +616,7 @@ public class GameFrame extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     private void load() {
+        readPlayer();
         btnNewGame.setEnabled(false);
         board = new Board(x, o);
         showBoard();
